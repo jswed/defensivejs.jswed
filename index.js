@@ -1,5 +1,7 @@
 "use strict";
 
+var FowardHandler = require('./lib/forwarding-handler');
+
 /**
  * change specified properties' descriptor on this object.
  * @param {String} props comma separated property list
@@ -13,6 +15,29 @@ Object.prototype.describe = function(props, descriptor) {
       Object.defineProperty(me, prop, descriptor);
     }
   });
+};
+
+/**
+ * create a new object, making the specified properties read-only.
+  * @param {String} props comma separated property list
+ */
+Object.prototype.readonly = function(props) {
+  var me = this;
+  props = props.split(',').reduce(function(obj, key) {
+    obj[key] = 1;
+    return obj;
+  },{});
+
+  function guardian(proxy, prop) {
+    if (prop in props) {
+      throw new ReferenceError("property \"" + prop + "\" is currently under protection");
+    }
+    return me[prop];
+  }
+
+  var handler = new FowardHandler(me);
+  handler.set = handler.get = guardian;
+  return Proxy.create(handler);
 };
 
 var obj = {
@@ -29,14 +54,12 @@ console.log(Object.keys(obj));
 
 obj.describe('maxage,updated,uid', { enumerable: false });
 
-Object.preventExtensions(obj);
-obj.email = 'foo@bar.com';  // can't augment
+console.log(Object.keys(obj));
 
-Object.seal(obj);
-delete obj.name;  // can't remove
+var proxied = obj.readonly('maxage,updated,uid');
 
+Object.keys(proxied);
+console.log(proxied.uid); // can't read
 
-Object.freeze(obj);
-obj.name = 'Garry'; // can't mutate
 
 
