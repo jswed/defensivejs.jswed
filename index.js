@@ -29,6 +29,14 @@ console.log(Object.keys(obj));
 
 obj.describe('maxage,updated,uid', { enumerable: false });
 
-console.log(Object.keys(obj));
+Object.preventExtensions(obj);
+obj.email = 'foo@bar.com';  // can't augment
+
+Object.seal(obj);
+delete obj.name;  // can't remove
+
+
+Object.freeze(obj);
+obj.name = 'Garry'; // can't mutate
 
 
