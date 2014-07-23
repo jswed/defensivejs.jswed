@@ -1,7 +1,5 @@
 "use strict";
 
-var FowardHandler = require('./lib/forwarding-handler');
-
 /**
  * change specified properties' descriptor on this object.
  * @param {String} props comma separated property list
